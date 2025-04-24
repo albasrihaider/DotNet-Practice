@@ -5,6 +5,7 @@ using RunGroopWebApp.Data;
 using RunGroopWebApp.Interfaces;
 using RunGroopWebApp.Models;
 using RunGroopWebApp.Repository;
+using RunGroopWebApp.ViewModels;
 
 
 namespace RunGroopWebApp.Controllers
@@ -12,11 +13,13 @@ namespace RunGroopWebApp.Controllers
     public class RaceController : Controller
     {
         private readonly IRaceRepository _raceRepository;
+        private readonly IPhotoService _photoService;
 
         [ActivatorUtilitiesConstructor]
-        public RaceController(IRaceRepository raceRepository)
+        public RaceController(IRaceRepository raceRepository, IPhotoService photoService)
         {
             _raceRepository = raceRepository;
+            _photoService = photoService;
         }
         public async Task<IActionResult> Index()
         {
@@ -42,16 +45,39 @@ namespace RunGroopWebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Race race)
+        public async Task<IActionResult> Create(CreateRaceViewModel raceMV)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(race);
-            }
-            _raceRepository.Add(race);
-            return RedirectToAction("Index");
+                var result = await _photoService.AddPhotoAsync(raceMV.Image);
+                var race = new Race
+                {
+                    Title = raceMV.Title,
+                    Description = raceMV.Description,
+                    Image = result.Url.ToString(),
+                    Address = new Address()
+                    {
+                        City = raceMV.Address.City,
+                        State = raceMV.Address.State,
+                        Street = raceMV.Address.Street,
 
-        }
+                    },
+
+                    RaceCategory = raceMV.RaceCategory
+                };
+
+                _raceRepository.Add(race);
+                return RedirectToAction("Index");
+
+            }
+            else
+            {
+                ModelState.AddModelError("", "Photo upload failed");
+            }
+
+            return View(raceMV);
+
+        } 
 
     }
 }
