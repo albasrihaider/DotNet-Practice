@@ -7,6 +7,7 @@ namespace RunGroopWebApp.Interfaces
 
         Task<IEnumerable<Club>> GetAll();
         Task<Club> GetByIdAysnc(int id);
+        Task<Club> GetByIdAysncNoTracking(int id);
         Task<IEnumerable<Club>> GetClubsByCity(string city);
 
         bool Add(Club club);

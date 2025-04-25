@@ -75,7 +75,64 @@ namespace RunGroopWebApp.Controllers
 
             return View(clubVM);
         }
+    public async Task<IActionResult> Edit(int id)
+        {
+            var club = await _clubRepository.GetByIdAysnc(id);
+            if (club == null) return View("Error");
+            var clubVM = new EditClubViewModel
+            {
+              
+                Title = club.Title,
+                Description = club.Description,
+                URL = club.Image,
+                AddressId = (int)club.AddressId,
+                Address = club.Address,
+                ClubCategory = club.ClubCategory
+            };
 
+            return View(clubVM);
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, EditClubViewModel clubVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError("", "Failed to edit club");
+                return View("Error", clubVM);
+            }
+            var userClub = await _clubRepository.GetByIdAysncNoTracking(id);
+            if (userClub != null)
+            {
+                try
+                {
+                    await _photoService.DeletePhotoAsync(userClub.Image);
+                }
+                catch (Exception)
+                {
+
+                    ModelState.AddModelError("", "Could not delete photo");
+                    return View(clubVM);
+                }
+                var photoResult = await _photoService.AddPhotoAsync(clubVM.Image);
+                var club = new Club
+                {
+                    Id = id,
+                    Title = clubVM.Title,
+                    Description = clubVM.Description,
+                    Image = photoResult.Url.ToString(),
+                    AddressId = (int)clubVM.AddressId,
+                    Address = clubVM.Address,
+                    ClubCategory = clubVM.ClubCategory
+                };
+                _clubRepository.Update(club);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Club not found");
+                return View("Error", clubVM);
+            }
+        }
     }
 }

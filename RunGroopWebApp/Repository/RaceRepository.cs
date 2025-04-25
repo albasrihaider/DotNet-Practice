@@ -48,6 +48,12 @@ namespace RunGroopWebApp.Repository
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<Race> GetByIdAysncNoTracking(int id)
+        {
+            return await _context.Races
+                .Include(c => c.Address) // Eagerly load the Address navigation property
+                .AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+        }
         public bool Save()
         {
             var saved = _context.SaveChanges();
