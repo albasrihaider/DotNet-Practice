@@ -30,7 +30,7 @@ namespace RunGroopWebApp.Controllers
         {
             // User is found, check password
             if (!ModelState.IsValid) return View(loginViewModel);
-            var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
+            var user = await _userManager.FindByEmailAsync(loginViewModel.EmailAddress);
             if (user != null)
             {
                 var passwordCheck = await _userManager.CheckPasswordAsync(user,loginViewModel.Password);
@@ -44,11 +44,11 @@ namespace RunGroopWebApp.Controllers
                     }
                 }
                 // Password is incorrect
-                TempData["Error"] = "Invalid login attempt. Please try again.";
+                TempData["Error"] = "Password is incorrect. Please try again.";
                 return View(loginViewModel);
             }
             // User not found
-            TempData["Error"] = "Invalid login attempt. Please try again.";
+            TempData["Error"] = "User not found. Please try again.";
             return View(loginViewModel);
 
         }
