@@ -134,5 +134,30 @@ namespace RunGroopWebApp.Controllers
                 return View("Error", clubVM);
             }
         }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var clubDetails = await _clubRepository.GetByIdAysnc(id);
+            if (clubDetails == null) return View("Error");
+            return View(clubDetails);
+        }
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteClub(int id)
+        {
+            var clubDetails = await _clubRepository.GetByIdAysnc(id);
+            if (clubDetails == null) return View("Error");
+            try
+            {
+                await _photoService.DeletePhotoAsync(clubDetails.Image);
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Could not delete photo");
+                return View(clubDetails);
+            }
+            _clubRepository.Delete(clubDetails);
+            return RedirectToAction("Index");
+        }
+
     }
 }
