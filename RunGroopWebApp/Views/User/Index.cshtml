@@ -5,44 +5,42 @@
 <section class="flush-with-above">
     <div class="container">
         <div class="row">
-            <div class="col">
-                <table class="table table-hover align-items-center table-borderless">
-                    <tbody>
-                        @if (Model !=null){
+            
+                @if (Model !=null){
                         @foreach (var user in Model)
                         {
-                            <tr class="bg-white">
-                                <th scope="row">
-                                    <div class="media align-items-center">
-                                     @*    <img alt="Image profile avatar" src="@user.ProfileImageUrl" class="avatar"> *@
-                                        <div class="media-body">
-                                            <span class="h6 mb-0">@user.UserName</span>
+                                <div class="col-md-4">
+                                    <div class="card mb-4 box-shadow">
+                                        <img class="card-img-top" src="@user.ProfileImageUrl" width="100%" height="225" alt="Card image cap">
+                                        <div class="card-body">
+                                            <p class="card-text">@user.UserName</p>
+                                            @{
+                                                var mileage = user.Milage == null ? "?" : user.Milage.ToString();
+                                                var pace = user.Pace == null ? "?" : user.Milage.ToString();
+                                            }
+                                            <p class="card-text">@mileage mile at @pace mph</p>
+                                            @* <p class="card-text">@user.Location</p> *@
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="btn-group">
+                                                    <a type="button" asp-controller="User" asp-action="Detail" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">View</a>
+
+                                                    @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                                                    {
+                                                        <a type="button" asp-controller="User" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                                        <a type="button" asp-controller="User" asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">Delete</a>
+                                                    }
+                                                </div>
+                                             
+                                            </div>
                                         </div>
                                     </div>
-                                </th>
-                                <td>
-                                    <a class="btn btn-outline-primary" asp-controller="User" asp-action="Detail" asp-route-id="@user.Id">
-                                        View Profile
-                                    </a>
-                                </td>
+                                </div>
 
-                                @{
-                                    var mileage = user.Milage == null ? "?" : user.Milage.ToString();
-                                    var pace = user.Pace == null ? "?" : user.Milage.ToString();
-                                }
-                                <td>@mileage mile at @pace mph</td>
-                                @* <td><i class="icon-location"></i> @user.Location</td> *@
-                            </tr>
-                            <tr class="table-divider">
-                                <th></th>
-                                <td></td>
-                            </tr>
+                      
                         }
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <!--end of col-->
+                        
+                }
+               
         </div>
         <!--end of row-->
     </div>

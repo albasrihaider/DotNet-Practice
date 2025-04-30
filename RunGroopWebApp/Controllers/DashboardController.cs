@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using RunGroopWebApp.Interfaces;
+using RunGroopWebApp.Models;
 using RunGroopWebApp.ViewModels;
 
 namespace RunGroopWebApp.Controllers
@@ -18,6 +20,15 @@ namespace RunGroopWebApp.Controllers
             _photoService = photoService;
         }
 
+        private void MapUserEdit (EditUserDashboardViewModel editVM, AppUser user ,ImageUploadResult photoResult)
+        {
+            user.UserName = editVM.UserName;
+            user.Pace = editVM.Pace;
+            user.Milage = editVM.Milage;
+            user.City = editVM.City;
+            user.State = editVM.State;
+            user.ProfileImageUrl = photoResult.Url.ToString();
+        }
         public async Task<IActionResult> Index()
         {
             var userRaces = await _dashboardRepository.GetAllUserRaces();
@@ -46,6 +57,47 @@ namespace RunGroopWebApp.Controllers
                State = user.State,
            };
             return View(editUserDashboardViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUserProfile(EditUserDashboardViewModel editVM)
+        { 
+            if(!ModelState.IsValid)
+            {
+              ModelState.AddModelError("", "Failed to edit profile");
+              return View("EditUserProfile", editVM);
+            }
+            var user = await _dashboardRepository.GetUserByIdNoTracking(editVM.Id);
+            if(user.ProfileImageUrl == "" || user.ProfileImageUrl == null)
+            {
+                var result = await _photoService.AddPhotoAsync(editVM.Image);
+                if (result.Error != null)
+                {
+                    ModelState.AddModelError("", "Failed to upload image");
+                    return View("EditUserProfile", editVM);
+                }
+               MapUserEdit(editVM, user, result);
+                _dashboardRepository.Update(user);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                try
+                {
+                    await _photoService.DeletePhotoAsync(user.ProfileImageUrl);
+                }
+                catch (Exception)
+                {
+
+                    ModelState.AddModelError("", "Could not delete photo");
+                    return View(editVM);
+                }
+                var result = await _photoService.AddPhotoAsync(editVM.Image);
+                MapUserEdit(editVM, user, result);
+                _dashboardRepository.Update(user);
+                return RedirectToAction("Index");
+            }
+            
         }
     }
 }
