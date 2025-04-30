@@ -16,7 +16,7 @@
                                             <p class="card-text">@user.UserName</p>
                                             @{
                                                 var mileage = user.Milage == null ? "?" : user.Milage.ToString();
-                                                var pace = user.Pace == null ? "?" : user.Milage.ToString();
+                                                var pace = user.Pace == null ? "?" : user.Pace.ToString();
                                             }
                                             <p class="card-text">@mileage mile at @pace mph</p>
                                             @* <p class="card-text">@user.Location</p> *@
